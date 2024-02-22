@@ -4,6 +4,30 @@ import Container from "@mui/material/Container"
 import { Button, TextField } from '@mui/material'
 
 function signUp() {
+
+  // On button press try to register with given information
+  const signUpButton = async () => {
+    let result
+    await fetch("/users/register", {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json"
+      },
+      body: JSON.stringify({
+        email: document.getElementById("email-input").value,
+        username: document.getElementById("username-input").value,
+        password: document.getElementById("password-input").value
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      result = data
+      console.log(result)
+    })
+  }       
+      
+  
+
   return (
     <>
       <Container maxWidth="sm">
@@ -15,7 +39,7 @@ function signUp() {
             <h2>Password</h2>
             <TextField id="password-input" label="Password" variant="filled" type='password'/>   
             <div>
-                <Button variant="outlined" sx={{ marginTop: "30px" }}>Sign Up </Button> 
+                <Button variant="outlined" sx={{ marginTop: "30px" }} onClick={() => signUpButton()}>Sign Up </Button> 
             </div>
         </Box> 
       </Container>
