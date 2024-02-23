@@ -4,6 +4,11 @@ const bcrypt = require("bcryptjs");
 const mongoose = require("mongoose");
 const {body, validationResult } = require("express-validator");
 const User = require("../models/User");
+const validateToken = require("../auth/validateToken.js")
+const jwt = require("jsonwebtoken");
+const multer = require("multer")
+const storage = multer.memoryStorage()
+const upload = multer({storage})
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
@@ -16,7 +21,6 @@ router.post('/register',
   body("email").isEmail(),
   body("password").isLength({min: 5}),
   (req, res, next) => {
-    console.log("Heippa")
     const errors = validationResult(req);
     if(!errors.isEmpty()) {
       return res.status(400).json({errors: errors.array()});
@@ -44,6 +48,42 @@ router.post('/register',
         });
       }
     });
+});
+
+// Handles logging in to an account
+router.post('/login', 
+  upload.none(),
+  (req, res, next) => {
+    User.findOne({email: req.body.email})
+    .then((user) =>{
+    if(!user) {
+      return res.status(403).json({message: "Login failed :("});
+    } else {
+      bcrypt.compare(req.body.password, user.password, (err, isMatch) => {
+        if(err) throw err;
+        if(isMatch) {
+          const jwtPayload = {
+            id: user._id,
+            email: user.email
+          }
+          jwt.sign(
+            jwtPayload,
+            process.env.SECRET,
+            {
+              expiresIn: 500
+            },
+            (err, token) => {
+              res.json({success: true, token});
+            }
+          );
+        } else {
+          return res.status(403).json({message: "Incorrect password :("});
+        }
+      })
+    }
+
+    })
+
 });
 
 module.exports = router;

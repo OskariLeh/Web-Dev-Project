@@ -7,3 +7,5 @@ let messageSchema = new Schema({
     receiver: {type: String},
     content: {type: String}
 })
+
+module.exports = mongoose.model("Message", messageSchema)

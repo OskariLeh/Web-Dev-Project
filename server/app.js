@@ -4,6 +4,8 @@ var cookieParser = require('cookie-parser');
 var mongoose = require("mongoose")
 var logger = require('morgan');
 
+require('dotenv').config();
+
 const mongoDB = "mongodb://127.0.0.1:27017/projectdb";
 mongoose.connect(mongoDB);
 mongoose.Promise = Promise;

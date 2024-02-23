@@ -8,3 +8,5 @@ let userSchema = new Schema({
     password: {type: String},
     likes: {type: Array}
 })
+
+module.exports = mongoose.model("User", userSchema)
