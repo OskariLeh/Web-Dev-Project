@@ -9,6 +9,8 @@ function Profile() {
     if (!authToken){
         window.location.href = "/login"
     }
+
+    // Gets your own profile information to display on this page
     useEffect(() =>
     async function getUserData() {
         const authToken = localStorage.getItem("auth_token")

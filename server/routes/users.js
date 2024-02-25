@@ -123,4 +123,84 @@ router.post("/update/profile", (req, res, next) => {
   })
 })
 
+// Adds a like to your profile
+router.post("/like", (req, res, next) => {
+  const email = jwt.decode(req.body.token).email
+  
+  User.findOne({email: email})
+  .then((user) => {
+    if (!user) {
+      return res.status(403).json({message: "Could not find the user"});
+    } else {
+      let like = {
+        user: req.body.id,
+        like: req.body.like
+      }
+      user.likes.push(like)
+      user.save()
+      return res.status(200).json({success: true})
+    }
+  })
+})
+
+// Gets all profiles then filters out all that have been liked and returns the remaining users usernames and bios
+router.post("/get/profiles", (req, res, next) => {
+  const email = jwt.decode(req.body.token).email
+  let likes = []
+  let profiles = []
+  
+  
+
+  User.findOne({email: email})
+  .then((user) => {
+    if (!user) {
+      return res.status(403).json({message: "Could not find the user"});
+    } else {
+      // Just get the id of every like thats all we care here
+      user.likes.forEach(like => {
+        likes.push(like.user)
+      }); 
+      User.find({})
+      .then(users => {
+        users.forEach(user => {
+          if (!likes.includes(user._id.toString()) && user.email != email){
+            let profile = {
+              id: user._id,
+              username: user.username,
+              bio: user.bio
+            }
+            profiles.push(profile)
+            
+          }
+        });
+        return res.status(200).json({profiles: profiles})
+      })
+    }
+  })
+})
+
+// Finds people that have liked eachother and returns them
+router.post("/get/matches", (req, res, next) => {
+  const email = jwt.decode(req.body.token).email
+  let likes = []
+  let matches = []
+  let originalUserId = ""
+  
+  User.findOne({email: email})
+  .then((user) => {
+    if (!user) {
+      return res.status(403).json({message: "Could not find the user"});
+    } else {
+      originalUserId = user._id.toString()
+      user.likes.forEach(like => {
+        // Check if liked or disliked
+        if (like.like){
+          likes.push(like)
+        }
+      })
+      
+    }
+  })
+})
+
 module.exports = router;
