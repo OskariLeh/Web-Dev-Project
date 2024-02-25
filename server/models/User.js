@@ -6,6 +6,7 @@ let userSchema = new Schema({
     username: {type: String},
     email: {type: String},
     password: {type: String},
+    bio: {type: String},
     likes: {type: Array}
 })
 

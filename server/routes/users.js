@@ -38,10 +38,11 @@ router.post('/register',
                 email: req.body.email,
                 username: req.body.username,
                 password: hash,
+                bio: "",
                 likes: []
               })
               .then((ok) => {
-                return res.json({email: "Account created"});
+                return res.json({success: true});
               }
             );
           });
@@ -64,6 +65,7 @@ router.post('/login',
         if(isMatch) {
           const jwtPayload = {
             id: user._id,
+            username: user.username,
             email: user.email
           }
           jwt.sign(
@@ -85,5 +87,40 @@ router.post('/login',
     })
 
 });
+
+// Returns the username and bio of the logged in profile
+router.post("/get/profile", (req, res, next) => {
+  const email = jwt.decode(req.body.token).email
+  
+  User.findOne({email: email})
+  .then((user) => {
+    if (!user) {
+      return res.status(403).json({message: "Could not find the user"});
+    } else {
+      let profile = {
+        username: user.username,
+        bio: user.bio
+      }
+      return res.status(200).json(profile)
+    }
+  })
+})
+
+// Makes changes to the user data in the MongoDB database
+router.post("/update/profile", (req, res, next) => {
+  const email = jwt.decode(req.body.token).email
+
+  
+  User.findOne({email: email})
+  .then((user) => {
+    if (!user) {
+      return res.status(403).json({message: "Could not find the user"});
+    } else {
+      user.bio = req.body.bio
+      user.save()
+      return res.status(200).json({success: true})
+    }
+  })
+})
 
 module.exports = router;

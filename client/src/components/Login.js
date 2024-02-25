@@ -8,7 +8,6 @@ function Login() {
 
   // Submits the form and tries to login
   const loginButton = async () => {
-    console.log("Pressed")
     await fetch("/users/login", {
       method: "POST",
       headers: {
@@ -42,7 +41,7 @@ function Login() {
             </div>
 
             <div>
-                <p>Dont have an account?</p>
+                <p>Don't have an account?</p>
                 <a href='/signUp'>Sign up</a>
             </div>
         </Box> 
