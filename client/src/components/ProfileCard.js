@@ -5,8 +5,8 @@ import { IconButton } from '@mui/material'
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import CloseIcon from '@mui/icons-material/Close';
 
+// Shows you profiles user has not yet liked or disliked
 function ProfileCard() {
-    // Shows you profiles that you have not yet liked or disliked
     const [profilesToLike, setProfilesTolike] = useState([])
 
     const authToken = localStorage.getItem("auth_token")
@@ -14,7 +14,7 @@ function ProfileCard() {
         window.location.href = "/login"
     } 
 
-    // Gets a list of profiles that you have not yet liked
+    // Gets a list of profiles that user has not yet liked
     useEffect(() =>
     async function getProfilesToLike() {
         const authToken = localStorage.getItem("auth_token")
@@ -22,7 +22,8 @@ function ProfileCard() {
         await fetch("/users/get/profiles", {
             method: "POST",
             headers: {
-              "Content-type": "application/json"
+              "Content-type": "application/json",
+              "Authorization": "Bearer " + authToken
             },
             body: JSON.stringify({token: authToken})
           })
@@ -33,6 +34,7 @@ function ProfileCard() {
         
     }, []) 
 
+    // Handles the like/dislike button functionality
     const handleLike = async (liked) => {
         if (profilesToLike.length === 0 || profilesToLike === undefined){
             return 
@@ -41,7 +43,8 @@ function ProfileCard() {
         await fetch("/users/like", {
             method: "POST",
             headers: {
-              "Content-type": "application/json"
+              "Content-type": "application/json",
+              "Authorization": "Bearer " + authToken
             },
             body: JSON.stringify({token: authToken, id: profilesToLike[0].id, like: liked})
           })
@@ -53,6 +56,7 @@ function ProfileCard() {
                 setProfilesTolike(profiles)
 
                 // This is a bad solution to get this page to work but could not figure out a better way
+                // Further development this should be improved
                 window.location.reload()
             }
           })

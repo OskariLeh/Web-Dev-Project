@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { Button, Container, TextField } from '@mui/material'
 
+    // Page for the user to view and edit their profile
 function Profile() {
-    // Edit your profile here
     const [userData, setUserData] = useState({})
 
     const authToken = localStorage.getItem("auth_token")
@@ -18,7 +18,8 @@ function Profile() {
         await fetch("/users/get/profile", {
             method: "POST",
             headers: {
-              "Content-type": "application/json"
+              "Content-type": "application/json",
+              "Authorization": "Bearer " + authToken
             },
             body: JSON.stringify({token: authToken})
           })
@@ -34,7 +35,8 @@ function Profile() {
         await fetch("/users/update/profile", {
             method: "POST",
             headers: {
-              "Content-type": "application/json"
+              "Content-type": "application/json",
+              "Authorization": "Bearer " + authToken
             },
             body: JSON.stringify({token: authToken, bio: userData.bio})
           })

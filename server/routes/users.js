@@ -51,7 +51,7 @@ router.post('/register',
     });
 });
 
-// Handles logging in to an account
+// Handles logging in to an account uses bcrypt to compare passwords and generates jsonwebtoken
 router.post('/login', 
   upload.none(),
   (req, res, next) => {
@@ -72,7 +72,7 @@ router.post('/login',
             jwtPayload,
             process.env.SECRET,
             {
-              expiresIn: 500
+              expiresIn: 2000
             },
             (err, token) => {
               res.json({success: true, token});
@@ -89,7 +89,7 @@ router.post('/login',
 });
 
 // Returns the username and bio of the logged in profile
-router.post("/get/profile", (req, res, next) => {
+router.post("/get/profile", validateToken, (req, res, next) => {
   const email = jwt.decode(req.body.token).email
   
   User.findOne({email: email})
@@ -106,8 +106,8 @@ router.post("/get/profile", (req, res, next) => {
   })
 })
 
-// Makes changes to the user data in the MongoDB database
-router.post("/update/profile", (req, res, next) => {
+// Changes bio in the database
+router.post("/update/profile", validateToken,(req, res, next) => {
   const email = jwt.decode(req.body.token).email
 
   
@@ -123,8 +123,8 @@ router.post("/update/profile", (req, res, next) => {
   })
 })
 
-// Adds a like to your profile
-router.post("/like", (req, res, next) => {
+// Adds a like to the profile when user likes/dislikes someone
+router.post("/like", validateToken, (req, res, next) => {
   const email = jwt.decode(req.body.token).email
   
   User.findOne({email: email})
@@ -144,25 +144,25 @@ router.post("/like", (req, res, next) => {
 })
 
 // Gets all profiles then filters out all that have been liked and returns the remaining users usernames and bios
-router.post("/get/profiles", (req, res, next) => {
+router.post("/get/profiles", validateToken, (req, res, next) => {
   const email = jwt.decode(req.body.token).email
   let likes = []
   let profiles = []
   
-  
-
   User.findOne({email: email})
   .then((user) => {
     if (!user) {
       return res.status(403).json({message: "Could not find the user"});
     } else {
-      // Just get the id of every like thats all we care here
+      // get the user id from every like 
       user.likes.forEach(like => {
         likes.push(like.user)
       }); 
+      // Get all users
       User.find({})
       .then(users => {
         users.forEach(user => {
+          // Finds the users which he current user has not liked/disliked yet
           if (!likes.includes(user._id.toString()) && user.email != email){
             let profile = {
               id: user._id,
@@ -180,27 +180,38 @@ router.post("/get/profiles", (req, res, next) => {
 })
 
 // Finds people that have liked eachother and returns them
-router.post("/get/matches", (req, res, next) => {
+router.post("/get/matches", validateToken, (req, res, next) => {
   const email = jwt.decode(req.body.token).email
-  let likes = []
   let matches = []
-  let originalUserId = ""
   
   User.findOne({email: email})
   .then((user) => {
     if (!user) {
       return res.status(403).json({message: "Could not find the user"});
     } else {
-      originalUserId = user._id.toString()
-      user.likes.forEach(like => {
-        // Check if liked or disliked
-        if (like.like){
-          likes.push(like)
+      // Get the logged in user and check which accounts that user liked 
+      user.likes.forEach((like, index) => {
+        if (like.like) {
+          User.findById(like.user)
+          .then(user2 => {
+            // Check if we have a match
+            if (user2.likes.some(like => like.user === user._id.toString() && like.like === true)) {
+              let match = {
+                id: user2._id,
+                username: user2.username,
+                bio: user2.username
+              }
+              matches.push(match)
+            }
+            if (index === user.likes.length - 1) {
+              return res.status(200).json({matches: matches})
+            } 
+          })
         }
-      })
-      
+      }); 
     }
   })
 })
+
 
 module.exports = router;

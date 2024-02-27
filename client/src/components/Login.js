@@ -7,6 +7,7 @@ function Login() {
   let [userData, setUserData] = useState({})
 
   // Submits the form and tries to login
+  // Saves jsonwebtoken to local storage on success
   const loginButton = async () => {
     await fetch("/users/login", {
       method: "POST",
