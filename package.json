@@ -9,7 +9,10 @@
     "install": "cd client && npm install",
     "preinstall": "cd server && npm install",
     "dev:server": "cd server && npm run dev",
-    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\""
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "start:server": "cd server && npm run start",
+    "start:client": "cd client && npm start",
+    "start": "concurrently \"npm run start:server\" \"npm run start:client\""
   },
   "author": "",
   "license": "ISC"
