@@ -25,8 +25,12 @@ function Profile() {
           })
           .then(response => response.json())
           .then(data => {
-            console.log(data)
-            setUserData(data)
+            if (data.fail === true) {
+              localStorage.removeItem("auth_token")
+            } else {
+              setUserData(data.profile)
+            }
+            
           })
         
     }, []) 
@@ -43,7 +47,9 @@ function Profile() {
           })
           .then(response => response.json())
           .then(data => {
-            console.log(data)
+            if (data.fail === true) {
+              localStorage.removeItem("auth_token")
+            }
           })
     }
 

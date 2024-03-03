@@ -48,6 +48,7 @@ function ProfileCard() {
     
 
     // Gets a list of profiles that user has not yet liked
+    // https://stackoverflow.com/questions/58101018/react-calling-a-method-on-load-only-once
     useEffect(() =>
     async function getProfilesToLike() {
         const authToken = localStorage.getItem("auth_token")
@@ -62,7 +63,12 @@ function ProfileCard() {
           })
           .then(response => response.json())
           .then(data => {
-            setProfilesTolike(data.profiles)
+            if (data.fail === true) {
+              localStorage.removeItem("auth_token")
+            } else {
+              setProfilesTolike(data.profiles)
+            }
+            
           })
         
     }, []) 
@@ -83,7 +89,10 @@ function ProfileCard() {
           })
           .then(response => response.json())
           .then(data => {
-            if (data.success){
+            if (data.fail === true) {
+              localStorage.removeItem("auth_token")
+            }
+            if (data.fail === false){
                 let profiles = profilesToLike
                 profiles.shift()
                 setProfilesTolike(profiles)

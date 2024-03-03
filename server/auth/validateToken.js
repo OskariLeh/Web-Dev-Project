@@ -12,7 +12,7 @@ module.exports = function(req, res, next) {
     if(token == null) return res.sendStatus(401);
     console.log(token);
     jwt.verify(token, process.env.SECRET, (err, user) => {
-        if(err) return res.sendStatus(403);
+        if(err) {return res.status(403).json({fail: true})};
         req.user = user;
         next();
     });

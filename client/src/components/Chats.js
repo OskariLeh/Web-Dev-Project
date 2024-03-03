@@ -29,8 +29,12 @@ function Chats() {
           })
           .then(response => response.json())
           .then(data => {
-            console.log(data)
-            setItems(data.matches)
+            if (data.fail === true) {
+              localStorage.removeItem("auth_token")
+            } else {
+              setItems(data.matches)
+            }
+            
           })
         
     }, []) 
@@ -53,7 +57,11 @@ function Chats() {
       })
       .then(response => response.json())
       .then(data => {
-        setMessageData(data)
+        if (data.fail === true) {
+          localStorage.removeItem("auth_token")
+        } else {
+          setMessageData(data)
+        }
       })
     }, [openUser]) 
         
@@ -75,21 +83,27 @@ function Chats() {
         })
         .then(response => response.json())
         .then(data => {
-          console.log(data)
-
-          // Update messages after new message sent
-          fetch("/users/list/messages", {
-            method: "POST",
-            headers: {
-              "Content-type": "application/json",
-              "Authorization": "Bearer " + authToken
-            },
-            body: JSON.stringify({token: authToken, receiver: openUser})
-          })
-          .then(response => response.json())
-          .then(data => {
-            setMessageData(data)
-          })
+          if (data.fail === true) {
+            localStorage.removeItem("auth_token")
+          } else {
+            // Update messages after new message sent
+            fetch("/users/list/messages", {
+              method: "POST",
+              headers: {
+                "Content-type": "application/json",
+                "Authorization": "Bearer " + authToken
+              },
+              body: JSON.stringify({token: authToken, receiver: openUser})
+            })
+            .then(response => response.json())
+            .then(data => {
+              if (data.fail === true) {
+                localStorage.removeItem("auth_token")
+              } else {
+                setMessageData(data)
+              }
+            })
+          }
         })
     }
 

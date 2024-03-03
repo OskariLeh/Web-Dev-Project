@@ -21,6 +21,7 @@ const MessageList = (props) => {
     }
 
     // sort the messages by time
+    // https://stackoverflow.com/questions/10123953/how-to-sort-an-object-array-by-date-property
     messages.sort(function(a,b) {
         let timeA = new Date(a.time)
         let timeB = new Date(b.time)
@@ -28,24 +29,26 @@ const MessageList = (props) => {
     })
     const listItems = messages.map((message) => {
         let date = new Date(message.time)
-
         // If the message is from current user it is disblayed on the right
         if (message.receiver === receiver) {
             return (
                 <ListItem key={message._id} >
                     <ListItemText
                       primary={message.content}
+                      // https://stackoverflow.com/questions/19263524/how-to-position-an-element-to-the-right-side
                       sx={{textAlign: "end"}}
-                      secondary={date.getDay() + "." + date.getMonth() + "." + date.getFullYear() + " " + date.getHours() + "." + date.getMinutes()}
+                      // Formatting time https://stackoverflow.com/questions/221294/how-do-i-get-a-timestamp-in-javascript
+                      secondary={date.getDate() + "." + (date.getMonth() + 1) + "." + date.getFullYear() + " " + date.getHours() + "." + date.getMinutes()}
                     />
                   </ListItem>
                 ) 
+        // If not from current user message on the left
         } else {
             return (
                 <ListItem key={message._id} >
                     <ListItemText
                       primary={message.content}
-                      secondary={date.getDay() + "." + date.getMonth() + "." + date.getFullYear() + " " + date.getHours() + "." + date.getMinutes()}
+                      secondary={date.getDate() + "." + date.getMonth() + "." + date.getFullYear() + " " + date.getHours() + "." + date.getMinutes()}
                     />
                   </ListItem>
                 )

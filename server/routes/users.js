@@ -102,7 +102,7 @@ router.post("/get/profile", validateToken, (req, res, next) => {
         username: user.username,
         bio: user.bio
       }
-      return res.status(200).json(profile)
+      return res.status(200).json({profile: profile, fail: false})
     }
   })
 })
@@ -119,7 +119,7 @@ router.post("/update/profile", validateToken,(req, res, next) => {
     } else {
       user.bio = req.body.bio
       user.save()
-      return res.status(200).json({success: true})
+      return res.status(200).json({fail: false})
     }
   })
 })
@@ -139,7 +139,7 @@ router.post("/like", validateToken, (req, res, next) => {
       }
       user.likes.push(like)
       user.save()
-      return res.status(200).json({success: true})
+      return res.status(200).json({fail: false})
     }
   })
 })
@@ -160,10 +160,12 @@ router.post("/get/profiles", validateToken, (req, res, next) => {
         likes.push(like.user)
       }); 
       // Get all users
+      // https://stackoverflow.com/questions/14103615/mongoose-get-full-list-of-users
       User.find({})
       .then(users => {
         users.forEach(user => {
           // Finds the users which he current user has not liked/disliked yet
+          // https://stackoverflow.com/questions/13104690/node-js-mongodb-objectid-to-string
           if (!likes.includes(user._id.toString()) && user.email != email){
             let profile = {
               id: user._id,
@@ -174,7 +176,7 @@ router.post("/get/profiles", validateToken, (req, res, next) => {
             
           }
         });
-        return res.status(200).json({profiles: profiles})
+        return res.status(200).json({profiles: profiles, fail: false})
       })
     }
   })
@@ -196,6 +198,7 @@ router.post("/get/matches", validateToken, (req, res, next) => {
           User.findById(like.user)
           .then(user2 => {
             // Check if we have a match
+            // https://stackoverflow.com/questions/51603456/array-includes-to-find-object-in-array
             if (user2.likes.some(like => like.user === user._id.toString() && like.like === true)) {
               let match = {
                 id: user2._id,
@@ -205,7 +208,7 @@ router.post("/get/matches", validateToken, (req, res, next) => {
               matches.push(match)
             }
             if (index === user.likes.length - 1) {
-              return res.status(200).json({matches: matches})
+              return res.status(200).json({matches: matches, fail: false})
             } 
           })
         }
@@ -230,7 +233,7 @@ router.post("/send/message", validateToken, (req, res, next) => {
         time: Date.now()
       })
       .then((ok) => {
-        return res.status(200).json({success: true})
+        return res.status(200).json({fail: false})
       })
     }
   })
@@ -250,7 +253,7 @@ router.post("/list/messages", validateToken, (req, res, next) => {
         Message.find({sender: req.body.receiver.id, receiver: user._id.toString()})
         .then(receivedMessages => {
           
-          return res.status(200).json({sentMessages: sentMessages, receivedMessages: receivedMessages})
+          return res.status(200).json({sentMessages: sentMessages, receivedMessages: receivedMessages, fail: false})
         })
       })
     }
