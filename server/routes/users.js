@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const mongoose = require("mongoose");
 const {body, validationResult } = require("express-validator");
 const User = require("../models/User");
+const Message = require("../models/Message");
 const validateToken = require("../auth/validateToken.js")
 const jwt = require("jsonwebtoken");
 const multer = require("multer")
@@ -209,6 +210,49 @@ router.post("/get/matches", validateToken, (req, res, next) => {
           })
         }
       }); 
+    }
+  })
+})
+
+// Saves a message sent by current user to the database
+router.post("/send/message", validateToken, (req, res, next) => {
+  const email = jwt.decode(req.body.token).email
+  
+  User.findOne({email: email})
+  .then((user) => {
+    if (!user) {
+      return res.status(403).json({message: "Could not find the user"});
+    } else {
+      Message.create({
+        sender: user.id,
+        receiver: req.body.receiver.id,
+        content: req.body.content,
+        time: Date.now()
+      })
+      .then((ok) => {
+        return res.status(200).json({success: true})
+      })
+    }
+  })
+})
+
+// Gets messages sent by two users to eachother
+router.post("/list/messages", validateToken, (req, res, next) => {
+  const email = jwt.decode(req.body.token).email
+  console.log(req.body.receiver)
+  User.findOne({email: email})
+  .then((user) => {
+    if (!user) {
+      return res.status(403).json({message: "Could not find the user"});
+    } else {
+      Message.find({sender: user._id.toString(), receiver: req.body.receiver.id})
+      .then(sentMessages => {
+        Message.find({sender: req.body.receiver.id, receiver: user._id.toString()})
+        .then(receivedMessages => {
+          
+          return res.status(200).json({sentMessages: sentMessages, receivedMessages: receivedMessages})
+        })
+      })
     }
   })
 })

@@ -3,7 +3,7 @@ import ListItemText from '@mui/material/ListItemText';
 
 
 // This returns a list used by Chat.js
-const MyList = (props) => {
+const MatchList = (props) => {
     const items = props.items
     const listItems = items.map((item) => {
         return (
@@ -21,4 +21,4 @@ const MyList = (props) => {
 }
 
 
-export default MyList
+export default MatchList

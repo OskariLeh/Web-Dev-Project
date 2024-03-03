@@ -8,11 +8,44 @@ import CloseIcon from '@mui/icons-material/Close';
 // Shows you profiles user has not yet liked or disliked
 function ProfileCard() {
     const [profilesToLike, setProfilesTolike] = useState([])
+    const [touchStart, setTouchStart] = useState(0);
+    const [touchEnd, setTouchEnd] = useState(0);
 
     const authToken = localStorage.getItem("auth_token")
     if (!authToken){
         window.location.href = "/login"
-    } 
+    }
+    
+    
+    // Saves where swipe starts
+    // Used https://stackoverflow.com/questions/40463173/swipe-effect-in-react-js
+    // for help with swipes
+    function handleTouchStart(e) {
+      setTouchStart(e.targetTouches[0].clientX);
+    }
+
+    // Saves where swipe ends
+    function handleTouchMove(e) {
+      setTouchEnd(e.targetTouches[0].clientX);
+      }
+
+    //Checks if swipe was left or right  
+    function handleTouchEnd() {
+      if (touchStart - touchEnd > 400) {
+        //Swipe left => dislike
+        setTouchEnd(0)
+        setTouchStart(0)
+        handleLike(false)
+      }
+
+      if (touchStart - touchEnd < -400) {
+        //Swipe right => like
+        setTouchEnd(0)
+        setTouchStart(0)
+        handleLike(true)
+      }
+    }
+    
 
     // Gets a list of profiles that user has not yet liked
     useEffect(() =>
@@ -63,7 +96,6 @@ function ProfileCard() {
     }
 
     const parseProfileInfo = () =>{
-        console.log(profilesToLike)
         if (profilesToLike.length === 0 || profilesToLike === undefined){
             return {username: "No profiles to view", bio: "Please come back later"}
         } else {
@@ -73,15 +105,31 @@ function ProfileCard() {
 
   return (
     <Container maxWidth="sm">
-        <Box sx={{ bgcolor: '#1a9aba', height: '50vh', marginTop: "50px", borderRadius: "25px"}}>
+        <Box 
+        sx={{ bgcolor: '#1a9aba', height: '50vh', marginTop: "50px", borderRadius: "25px", minHeight: 400}}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        >
             <h1>{parseProfileInfo().username}</h1>
             <hr></hr>
             <p>{parseProfileInfo().bio}</p>
         </Box> 
-        <IconButton sx={{ color: "red", marginRight: "50px"}} name="like" onClick={() => handleLike(true)}>
+        <IconButton 
+        sx={{ color: "red", marginRight: "50px"}} 
+        name="like" 
+        onClick={() => handleLike(true)}
+        >
             <FavoriteIcon sx={{fontSize: "100px"}}/>
         </IconButton>
-        <IconButton sx={{ color: "black"}} name="dislike" onClick={() => handleLike(false)}>
+        <IconButton 
+        sx={{ color: "black"}} 
+        name="dislike" 
+        onClick={() => handleLike(false)} 
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        >
             <CloseIcon sx={{fontSize: "100px"}}/>
         </IconButton>
 

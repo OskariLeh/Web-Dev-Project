@@ -32,7 +32,7 @@ function Login() {
   return (
     <>
       <Container maxWidth="sm">
-        <Box sx={{ bgcolor: '#cfe8fc', height: '50vh', marginTop: "50px" }}>
+        <Box sx={{ bgcolor: '#cfe8fc', height: '50vh', marginTop: "50px", minHeight: 400}}>
             <h2>Email</h2>
             <TextField id="email-input" name='email' label="example@example.com" variant="filled" onChange={handleChange}/>
             <h2>Password</h2>

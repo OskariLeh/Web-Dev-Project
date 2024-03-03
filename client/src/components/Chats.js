@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { Container, Box, TextField, Button } from '@mui/material'
-import MyList from "./MyList"
+import MatchList from "./MatchList"
+import MessageList from "./MessageList"
 
 // Lists your matches and allows you to send and read messages
 function Chats() {
   const [chatData, setChatData] = useState()
+  const [messageData, setMessageData] = useState({sentMessages: [], receivedMessages: []})
   const [openUser, setOpenUser] = useState({username: "Username"})
   const [items, setItems] = useState([])
   const authToken = localStorage.getItem("auth_token")
@@ -37,24 +39,78 @@ function Chats() {
       setOpenUser(user)
     }
 
+    // When match is selected fetch messages
+    useEffect(() => {
+    const authToken = localStorage.getItem("auth_token")
+
+      fetch("/users/list/messages", {
+        method: "POST",
+        headers: {
+          "Content-type": "application/json",
+          "Authorization": "Bearer " + authToken
+        },
+        body: JSON.stringify({token: authToken, receiver: openUser})
+      })
+      .then(response => response.json())
+      .then(data => {
+        setMessageData(data)
+      })
+    }, [openUser]) 
+        
     const handleChange = (e) => {
-      setChatData({...chatData, [e.target.name]: e.target.value})
+      setChatData(e.target.value)
+    }
+
+    // Sends message to server and saves it to database
+    const sendMessage = () => {
+      const authToken = localStorage.getItem("auth_token")
+        
+      fetch("/users/send/message", {
+          method: "POST",
+          headers: {
+            "Content-type": "application/json",
+            "Authorization": "Bearer " + authToken
+          },
+          body: JSON.stringify({token: authToken, receiver: openUser, content: chatData})
+        })
+        .then(response => response.json())
+        .then(data => {
+          console.log(data)
+
+          // Update messages after new message sent
+          fetch("/users/list/messages", {
+            method: "POST",
+            headers: {
+              "Content-type": "application/json",
+              "Authorization": "Bearer " + authToken
+            },
+            body: JSON.stringify({token: authToken, receiver: openUser})
+          })
+          .then(response => response.json())
+          .then(data => {
+            setMessageData(data)
+          })
+        })
     }
 
   return (
     <Container maxWidth="md" sx={{display: "flex", justifyContent: "right"}}>
-        <Box sx={{ bgcolor: '#1a9aba', height: '50vh', width: "25vh", marginTop: "50px", borderRadius: "25px", marginRight: "15px"}}>
-            <MyList 
+        <Box sx={{ bgcolor: '#1a9aba', height: '50vh', width: "25vh", marginTop: "50px", borderRadius: "25px", marginRight: "15px", minWidth: 250, minHeight: 500}}>
+            <MatchList 
             items={items}
             matchClicked={matchClicked}
             />
         </Box> 
-        <Box sx={{ bgcolor: '#cfe8fc', height: '50vh', width: "35vh", marginTop: "50px", borderRadius: "25px"}}>
+        <Box sx={{ position:"relative", bgcolor: '#cfe8fc', height: '50vh', width: "35vh", marginTop: "50px", borderRadius: "25px", minWidth: 400, minHeight: 500}}>
             <h1>{openUser.username}</h1>
-            <div>
-              <TextField id="chat-input" label="Chat" variant="filled" name='chat' onChange={handleChange} sx={{position: "relative", marginTop: "500px"}}/>
-              <Button variant="outlined" sx={{ marginTop: "510px", marginLeft: "10px" }}>Send </Button> 
-            </div>
+            <MessageList
+            items={messageData}
+            receiver={openUser}
+            />
+
+            <TextField id="chat-input" label="Chat" variant="filled" name='chat' onChange={handleChange} sx={{position: "absolute", bottom: 2, left: 70}}/>
+            <Button variant="outlined" onClick={sendMessage} sx={{position: "absolute", bottom: 10, left: 290 }}>Send </Button> 
+            
             
         </Box> 
 

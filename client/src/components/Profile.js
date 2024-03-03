@@ -31,6 +31,7 @@ function Profile() {
         
     }, []) 
     
+    // Saves edited data to database
     const handleSave = async (e) => {
         await fetch("/users/update/profile", {
             method: "POST",
